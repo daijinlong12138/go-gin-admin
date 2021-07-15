@@ -6,7 +6,6 @@ import (
 	"go-gin-admin/common"
 )
 
-
 func main() {
 
 	common.InitDB()
@@ -24,5 +23,3 @@ func main() {
 	router.Run(":8000")
 
 }
-
-
