@@ -2,11 +2,12 @@ package common
 
 import (
 	"github.com/dgrijalva/jwt-go"
+	"github.com/spf13/viper"
 	"go-gin-admin/model"
 	"time"
 )
 
-var jwtKey = []byte("SE@W#@#SDSA")
+var jwtKey = []byte(viper.GetString("Jwt.key"))
 
 type Claims struct {
 	UserID uint
