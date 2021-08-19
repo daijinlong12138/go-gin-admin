@@ -3,6 +3,7 @@ package common
 import (
 	"database/sql"
 	"fmt"
+	"github.com/spf13/viper"
 	"go-gin-admin/model"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -11,12 +12,13 @@ import (
 var DB *gorm.DB
 
 func InitDB() *gorm.DB {
-	host := "47.107.140.71"
-	port := "3306"
-	username := "aliyunget"
-	password := "yuan@get940314"
-	database := "test"
-	charset := "utf8"
+
+	host := viper.GetString("datasoure.host")
+	port := viper.GetString("datasoure.port")
+	username := viper.GetString("datasoure.username")
+	password := viper.GetString("datasoure.password")
+	database := viper.GetString("datasoure.database")
+	charset := viper.GetString("datasoure.charset")
 
 	args := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=%s&parseTime=true",
 		username,
@@ -35,10 +37,21 @@ func InitDB() *gorm.DB {
 	}
 
 	db.AutoMigrate(&model.Users{})
+
+	db.AutoMigrate(&model.AdminRoles{})
+	db.AutoMigrate(&model.AdminUsers{})
+	db.AutoMigrate(&model.AdminRoleUsers{})
+	db.AutoMigrate(&model.AdminPermissions{})
+	db.AutoMigrate(&model.AdminMenu{})
+	db.AutoMigrate(&model.AdminRoleMenu{})
+	db.AutoMigrate(&model.AdminRolePermissions{})
+	db.AutoMigrate(&model.AdminUserPermissions{})
+	db.AutoMigrate(&model.AdminOperationLog{})
+
 	DB = db
 	return db
 }
 
-func GetDB() *gorm.DB  {
+func GetDB() *gorm.DB {
 	return DB
 }
