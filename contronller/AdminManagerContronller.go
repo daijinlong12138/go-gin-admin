@@ -44,7 +44,7 @@ func ManagerNew(c *gin.Context) {
 	}
 
 	var roleIdArr []string
-	if len(permission_ids) != 0 {
+	if len(role_ids) != 0 {
 		roleIdArr = strings.Split(role_ids, `,`)
 	}
 	var permissionIdArr []string
