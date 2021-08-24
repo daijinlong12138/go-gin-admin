@@ -9,7 +9,7 @@ import (
 func CollectRoute(r *gin.Engine) *gin.Engine {
 
 	//版本1--使用公共中间件，使用接口鉴权--登录不需要
-	v1 := r.Group("auth").Use(middleware.CommonMiddleware()).Use(middleware.ApiInterfaceAuthCheck())
+	v1 := r.Group("auth").Use(middleware.ApiInterfaceAuthCheck())
 	v1.POST("/admin/roles/new", contronller.RolesNew)                   //角色新增接口
 	v1.POST("/admin/roles/detail", contronller.RolesDetail)             //角色详情接口
 	v1.POST("/admin/roles/delete", contronller.RolesDelete)             //角色删除接口
@@ -33,6 +33,7 @@ func CollectRoute(r *gin.Engine) *gin.Engine {
 	v1.POST("/admin/menu/delete", contronller.MenuDelete)               //菜单删除接口
 	v1.POST("/admin/menu/info", contronller.MenuInfo)                   //菜单管理展示接口
 	v1.POST("/admin/menu/edit", contronller.MenuEdit)                   //菜单编辑接口
+	v1.POST("/admin/oplog/info", contronller.OpLogsInfo)                //日志列表获取接口
 
 	r.POST("/api/auth/register", contronller.Register)
 	r.POST("/api/auth/login", contronller.Login)
@@ -66,5 +67,6 @@ func CollectRoute(r *gin.Engine) *gin.Engine {
 	r.POST("/admin/menu/info", contronller.MenuInfo)     //菜单管理展示接口
 	r.POST("/admin/menu/edit", contronller.MenuEdit)     //菜单编辑接口
 
+	r.POST("/admin/oplog/info", contronller.OpLogsInfo) //日志列表获取接口
 	return r
 }

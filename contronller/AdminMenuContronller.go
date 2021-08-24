@@ -167,14 +167,14 @@ func MenuInfo(c *gin.Context) {
 func MenuEdit(c *gin.Context) {
 	DB := common.GetDB()
 	//获取参数
-	id := c.PostForm("id")               //菜单id
-	parent_id := c.PostForm("parent_id") //父级ID -- 顶级默认0
-	title := c.PostForm("title")         //菜单名
-	header := c.PostForm("header")       //header
-	icon := c.PostForm("icon")           //图标
-	url := c.PostForm("url")             //路径
-	order := c.PostForm("order")         //排序
-	role_ids := c.PostForm("role_ids")   //角色,逗号分割
+	id := c.PostForm("id")                        //菜单id
+	parent_id := c.DefaultQuery("parent_id", "0") //父级ID -- 顶级默认0
+	title := c.PostForm("title")                  //菜单名
+	header := c.PostForm("header")                //header
+	icon := c.PostForm("icon")                    //图标
+	url := c.PostForm("url")                      //路径
+	order := c.PostForm("order")                  //排序
+	role_ids := c.PostForm("role_ids")            //角色,逗号分割
 
 	parent_idInt, _ := strconv.Atoi(parent_id)
 	idInt, _ := strconv.Atoi(id)

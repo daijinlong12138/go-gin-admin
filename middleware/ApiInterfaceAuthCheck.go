@@ -10,8 +10,10 @@ import (
 	"strings"
 )
 
+//操作日志数据库缺少参数数据
 func ApiInterfaceAuthCheck() gin.HandlerFunc {
 	return func(c *gin.Context) {
+
 		//获取authorization header
 		tokenString := c.GetHeader("Authorization")
 
@@ -55,6 +57,16 @@ func ApiInterfaceAuthCheck() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
+		//记录到数据库中
+		IP := c.ClientIP()
+		newAdminOperationLog := model.AdminOperationLog{
+			UserId:   int(userId),
+			UserName: user.Name,
+			Method:   method,
+			Path:     url,
+			Ip:       IP,
+		}
+		contronller.InsertLogs(DB, newAdminOperationLog)
 
 		c.Set("user", user)
 		c.Next()
