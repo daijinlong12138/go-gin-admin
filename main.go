@@ -12,6 +12,7 @@ import (
 func main() {
 	InitConfig()
 	common.InitDB()
+	common.InitLog()
 
 	// 1.创建路由
 	router := gin.Default()
