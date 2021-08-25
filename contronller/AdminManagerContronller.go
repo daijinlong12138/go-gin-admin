@@ -485,11 +485,9 @@ func ManagerLogin(c *gin.Context) {
 	token, err := common.ReleaseToken(user)
 	if err != nil {
 		response.Fail(c, "系统异常", nil)
-		common.Log.Error("token generate error ", err)
 		log.Printf("token generate error : %v", err)
 		return
 	}
-	common.Log.Info("Rep: token ", token)
 	response.Success(c, gin.H{"token": token}, "登录成功")
 }
 

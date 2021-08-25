@@ -2,7 +2,9 @@ package response
 
 import (
 	"github.com/gin-gonic/gin"
+	"go-gin-admin/common"
 	"net/http"
+	"strconv"
 )
 
 const (
@@ -16,6 +18,7 @@ func Response(ctx *gin.Context, httpStatus int, code int, data interface{}, msg 
 		"data": data,
 		"msg":  msg,
 	})
+	common.Log.Info(strconv.Itoa(httpStatus), strconv.Itoa(code), msg, data)
 }
 
 func Success(ctx *gin.Context, data interface{}, msg string) {
