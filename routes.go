@@ -21,7 +21,7 @@ func CollectRoute(r *gin.Engine) *gin.Engine {
 	v1.POST("/admin/permission/delete", contronller.PermissionDelete)   //权限删除接口
 	v1.POST("/admin/permission/info", contronller.PermissionInfo)       //权限管理展示接口
 	v1.POST("/admin/permission/edit", contronller.PermissionEdit)       //权限编辑接口
-	v1.POST("/admin/permission/allinfo", contronller.PermissionAllinfo) //全部权限展示接口
+	v1.POST("/admin/permission/allinfo", contronller.PermissionAllInfo) //全部权限展示接口
 	v1.POST("/admin/uploadimg", contronller.UploadImg)                  //上传文件
 	v1.POST("/admin/manager/new", contronller.ManagerNew)               //用户新增接口
 	v1.POST("/admin/manager/detail", contronller.ManagerDetail)         //用户详情接口

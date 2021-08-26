@@ -198,7 +198,7 @@ func PermissionEdit(c *gin.Context) {
 	response.Success(c, nil, "成功")
 }
 
-func PermissionAllinfo(ctx *gin.Context) {
+func PermissionAllInfo(ctx *gin.Context) {
 	db := common.GetDB()
 	var data []model.AdminPermissions
 	var _data []model.AdminPermissionsTodo
