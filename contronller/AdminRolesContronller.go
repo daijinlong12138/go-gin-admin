@@ -6,7 +6,6 @@ import (
 	"go-gin-admin/model"
 	"go-gin-admin/response"
 	"gorm.io/gorm"
-	"log"
 	"strconv"
 	"strings"
 )
@@ -38,8 +37,7 @@ func RolesNew(c *gin.Context) {
 	}
 	DB.Create(&newRoles)
 
-	log.Println(name, slug)
-
+	//log.Println(name, slug)
 	response.Success(c, nil, "角色增加成功")
 }
 
@@ -54,7 +52,7 @@ func RolesDetail(c *gin.Context) {
 		response.Fail(c, "不存在", nil)
 		return
 	}
-	log.Println(roles)
+	//log.Println(roles)
 	response.Success(c, model.ToAdminRolesTodo(roles), "成功")
 
 }

@@ -61,7 +61,7 @@ func PermissionNew(ctx *gin.Context) {
 func PermissionDetail(ctx *gin.Context) {
 	DB := common.GetDB()
 	//获取参数
-	id := ctx.PostForm("id") //角色ID
+	id := ctx.PostForm("id") //权限ID
 	var permission = model.AdminPermissions{}
 
 	DB.Where("id = ?", id).Find(&permission)
@@ -84,11 +84,32 @@ func PermissionDelete(c *gin.Context) {
 		response.Fail(c, "不存在", nil)
 		return
 	}
-	err := DB.Where("id = ?", Id).Unscoped().Delete(&model.AdminPermissions{}).Error
+
+	tx := DB.Begin()
+	err := tx.Where("id = ?", Id).Unscoped().Delete(&model.AdminPermissions{}).Error
 	if err != nil {
-		response.Fail(c, "删除失败", nil)
+		common.LogError(c, "删除 AdminPermissions 失败: "+err.Error())
+		response.Fail(c, "删除 AdminPermissions 失败", nil)
+		tx.Rollback()
 		return
 	}
+	err = tx.Where("permission_id = ?", Id).Unscoped().Delete(&model.AdminUserPermissions{}).Error
+	if err != nil {
+		common.LogError(c, "删除 AdminUserPermissions 失败: "+err.Error())
+		response.Fail(c, "删除 AdminUserPermissions 失败", nil)
+		tx.Rollback()
+		return
+	}
+
+	err = tx.Where("permission_id = ?", Id).Unscoped().Delete(&model.AdminRolePermissions{}).Error
+	if err != nil {
+		common.LogError(c, "删除 AdminRolePermissions 失败: "+err.Error())
+		response.Fail(c, "删除 AdminRolePermissions 失败", nil)
+		tx.Rollback()
+		return
+	}
+	tx.Commit()
+
 	response.Success(c, nil, "成功")
 }
 
