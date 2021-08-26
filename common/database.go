@@ -87,7 +87,7 @@ func InitDB() *gorm.DB {
 	//检查用户是否有id=1的，没有表插入默认数据  123456
 	var user model.AdminUsers
 	err = db.Where("id = 1").Find(&user).Error
-	if err != nil || user.ID == 0 {
+	if err != nil {
 		Log.Error("查询失败: " + err.Error())
 		panic(" 查询失败 ")
 	}
@@ -98,14 +98,9 @@ func InitDB() *gorm.DB {
 			panic(" 加密错误 ")
 		}
 		//创建用户
-		newUser := model.AdminUsers{
-			Id:       1,
-			Username: "admin",
-			Name:     "admin",
-			Password: string(hasedPassword),
-		}
-		err = db.Create(&newUser).Error
-		if err != nil || newUser.ID == 0 {
+		err = db.Exec("INSERT INTO `admin_users` (`id`, `created_at`, `username`, `password`, `name`) VALUES "+
+			"(1, NOW(),  'admin', ?, 'admin')", string(hasedPassword)).Error
+		if err != nil {
 			Log.Error("创建失败: " + err.Error())
 			panic(" 创建失败 ")
 		}
