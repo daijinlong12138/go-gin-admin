@@ -1,6 +1,7 @@
 package common
 
 import (
+	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
 	"go-gin-admin/package/mylogger"
 )
@@ -16,4 +17,15 @@ func InitLog() *mylogger.FileLogger {
 
 func GetLog() *mylogger.FileLogger {
 	return Log
+}
+
+//方法中描述--加入访问地址--不返回到界面的
+func LogInfo(ctx *gin.Context, msg string, arg ...interface{}) {
+	URLpath := ctx.Request.URL.Path + " "
+	Log.Info(URLpath+msg, arg...)
+}
+
+func LogError(ctx *gin.Context, msg string, arg ...interface{}) {
+	URLpath := ctx.Request.URL.Path + " "
+	Log.Error(URLpath+msg, arg...)
 }

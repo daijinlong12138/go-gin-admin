@@ -10,7 +10,6 @@ import (
 	"go-gin-admin/util"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
-	"log"
 	"os"
 	"strconv"
 	"strings"
@@ -460,7 +459,6 @@ func ManagerLogin(c *gin.Context) {
 	var user = model.AdminUsers{}
 	username := c.PostForm("username")
 	password := c.PostForm("password")
-	common.Log.Info("Req: ", c.Request.MultipartForm.Value)
 
 	//校验
 	if len(username) == 0 {
@@ -482,10 +480,12 @@ func ManagerLogin(c *gin.Context) {
 		return
 	}
 
+	//common.LogInfo(c,"密码是通过了")
+
 	token, err := common.ReleaseToken(user)
 	if err != nil {
+		common.LogError(c, "token generate error : "+err.Error())
 		response.Fail(c, "系统异常", nil)
-		log.Printf("token generate error : %v", err)
 		return
 	}
 	response.Success(c, gin.H{"token": token}, "登录成功")

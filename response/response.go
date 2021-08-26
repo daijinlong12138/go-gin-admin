@@ -1,10 +1,10 @@
 package response
 
 import (
+	"encoding/json"
 	"github.com/gin-gonic/gin"
 	"go-gin-admin/common"
 	"net/http"
-	"strconv"
 )
 
 const (
@@ -13,12 +13,18 @@ const (
 )
 
 func Response(ctx *gin.Context, httpStatus int, code int, data interface{}, msg string) {
-	ctx.JSON(httpStatus, gin.H{
+	h := gin.H{
 		"code": code,
 		"data": data,
 		"msg":  msg,
-	})
-	common.Log.Info(strconv.Itoa(httpStatus), strconv.Itoa(code), msg, data)
+	}
+	ctx.JSON(httpStatus, h)
+	str, err := json.Marshal(h)
+	if err != nil {
+		common.Log.Error(err.Error())
+	}
+	URLpath := ctx.Request.URL.Path
+	common.Log.Info(URLpath + " Response: " + string(str))
 }
 
 func Success(ctx *gin.Context, data interface{}, msg string) {

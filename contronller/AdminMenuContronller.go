@@ -87,6 +87,7 @@ func MenuNew(c *gin.Context) {
 		err = model.AddRoleMenus(tx, arr)
 		if err != nil {
 			response.Fail(c, "用户添加角色失败", nil)
+			common.LogError(c, "用户添加角色失败: "+err.Error())
 			tx.Rollback()
 			return
 		}
@@ -133,6 +134,7 @@ func MenuDelete(c *gin.Context) {
 	if err != nil {
 		tx.Rollback()
 		response.Fail(c, "删除失败", nil)
+		common.LogError(c, "删除失败: "+err.Error())
 		return
 	}
 	//删除自身及所有下级菜单
@@ -140,6 +142,7 @@ func MenuDelete(c *gin.Context) {
 	if !check {
 		tx.Rollback()
 		response.Fail(c, "删除失败:"+err.Error(), nil)
+		common.LogError(c, "删除失败: "+err.Error())
 		return
 	}
 
@@ -156,6 +159,8 @@ func MenuInfo(c *gin.Context) {
 	err := db.Find(&menuList).Error
 	if err != nil {
 		response.Fail(c, "查询失败", nil)
+		common.LogError(c, "查询失败: "+err.Error())
+		return
 	}
 	//2.数据处理
 	// 查找相同上级目录--组成数组，并排序
@@ -219,6 +224,7 @@ func MenuEdit(c *gin.Context) {
 	err := db.Find(&menuList).Error
 	if err != nil {
 		response.Fail(c, "查询失败", nil)
+		common.LogError(c, "查询失败: "+err.Error())
 	}
 	//2.数据处理
 	// 查找相同上级目录--组成数组，并排序
@@ -239,8 +245,9 @@ func MenuEdit(c *gin.Context) {
 	data["url"] = url
 	data["order"] = order
 
-	if err := tx.Model(&model.AdminMenu{}).Where("id = ?", id).Updates(&data).Error; err != nil {
+	if err = tx.Model(&model.AdminMenu{}).Where("id = ?", id).Updates(&data).Error; err != nil {
 		response.Fail(c, "更新失败", nil)
+		common.LogError(c, "更新失败: "+err.Error())
 		tx.Rollback()
 		return
 	}
@@ -249,6 +256,7 @@ func MenuEdit(c *gin.Context) {
 	err = tx.Where("menu_id = ?", id).Unscoped().Delete(&model.AdminRoleMenu{}).Error
 	if err != nil {
 		response.Fail(c, "删除菜单角色失败", nil)
+		common.LogError(c, "删除菜单角色失败: "+err.Error())
 		tx.Rollback()
 		return
 	}
@@ -265,6 +273,7 @@ func MenuEdit(c *gin.Context) {
 		err = model.AddRoleMenus(tx, arr)
 		if err != nil {
 			response.Fail(c, "更新角色失败", nil)
+			common.LogError(c, "更新角色失败: "+err.Error())
 			tx.Rollback()
 			return
 		}

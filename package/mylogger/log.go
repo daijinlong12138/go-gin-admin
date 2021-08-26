@@ -5,6 +5,7 @@ import (
 	"os"
 	"path"
 	"runtime"
+	"strconv"
 	"time"
 )
 
@@ -67,17 +68,14 @@ func runFuncName() string {
 
 //Debug 方法
 func (f *FileLogger) Debug(msg string, arg ...interface{}) {
-
-	msg += "["
-
-	msg += "]"
+	fileName, funcName, lineNo := GetLineInfo()
+	msg = "[" + fileName + "] [" + funcName + "] [" + strconv.Itoa(lineNo) + "] " + msg
 	f.log(1, msg, arg...)
 }
 
 //Info 方法
 func (f *FileLogger) Info(msg string, arg ...interface{}) {
 	f.log(3, msg, arg...)
-
 }
 
 //Warn 方法
@@ -87,6 +85,8 @@ func (f *FileLogger) Warn(msg string, arg ...interface{}) {
 
 //Error 方法
 func (f *FileLogger) Error(msg string, arg ...interface{}) {
+	fileName, funcName, lineNo := GetLineInfo()
+	msg = "[" + fileName + "] [" + funcName + "] [" + strconv.Itoa(lineNo) + "] " + msg
 	f.log(5, msg, arg...)
 }
 
@@ -112,4 +112,14 @@ func getLogString(lv int) string {
 	default:
 		return "UNKNOW"
 	}
+}
+
+func GetLineInfo() (fileName string, funcName string, lineNo int) {
+	pc, file, line, ok := runtime.Caller(4)
+	if ok {
+		fileName = file
+		funcName = runtime.FuncForPC(pc).Name()
+		lineNo = line
+	}
+	return
 }

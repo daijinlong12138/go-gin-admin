@@ -1,7 +1,6 @@
 package contronller
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"go-gin-admin/common"
 	"go-gin-admin/model"
@@ -121,7 +120,9 @@ func RolesInfo(c *gin.Context) {
 
 	db = db.Limit(pageSize).Offset((page - 1) * pageSize)
 	if err := db.Find(&roles).Error; err != nil {
-		fmt.Println(err.Error())
+		common.LogError(c, "查询数据异常 : "+err.Error())
+		response.Fail(c, "查询数据异常", nil)
+		return
 	}
 
 	// 格式化
@@ -189,6 +190,7 @@ func RolesEdit(c *gin.Context) {
 	data["slug"] = slug
 
 	if err := tx.Model(&model.AdminRoles{}).Where("id = ?", id).Updates(&data).Error; err != nil {
+		common.LogError(c, "更新失败: "+err.Error())
 		response.Fail(c, "更新失败", nil)
 		tx.Rollback()
 		return
@@ -197,6 +199,7 @@ func RolesEdit(c *gin.Context) {
 	//先批量删除角色对应权限
 	err := tx.Where("role_id = ?", Id).Unscoped().Delete(&model.AdminRolePermissions{}).Error
 	if err != nil {
+		common.LogError(c, "删除失败: "+err.Error())
 		response.Fail(c, "删除失败", nil)
 		tx.Rollback()
 		return
@@ -214,6 +217,7 @@ func RolesEdit(c *gin.Context) {
 		}
 		err = model.AddRolePermissions(tx, arr)
 		if err != nil {
+			common.LogError(c, "更新权限失败: "+err.Error())
 			response.Fail(c, "更新权限失败", nil)
 			tx.Rollback()
 			return

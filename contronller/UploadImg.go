@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
+	"go-gin-admin/common"
 	"go-gin-admin/response"
 	"go-gin-admin/util"
 	"path"
@@ -17,6 +18,7 @@ func UploadImg(ctx *gin.Context) {
 	f, err := ctx.FormFile("imgfile")
 	if err != nil {
 		response.Fail(ctx, "上传失败", nil)
+		common.LogError(ctx, "上传失败: "+err.Error())
 		return
 	} else {
 
@@ -36,9 +38,10 @@ func UploadImg(ctx *gin.Context) {
 			}
 		}*/
 		filepath := fmt.Sprintf("%s%s", fileName, fileExt)
-		err := ctx.SaveUploadedFile(f, UploadTmp+filepath)
+		err = ctx.SaveUploadedFile(f, UploadTmp+filepath)
 		if err != nil {
 			response.Fail(ctx, "保存文件失败", nil)
+			common.LogError(ctx, "保存文件失败: "+err.Error())
 			return
 		}
 		response.Success(ctx, gin.H{
