@@ -1,7 +1,6 @@
 package contronller
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"go-gin-admin/common"
 	"go-gin-admin/model"
@@ -126,7 +125,9 @@ func PermissionInfo(c *gin.Context) {
 
 	db = db.Limit(pageSize).Offset((page - 1) * pageSize)
 	if err := db.Find(&permissions).Error; err != nil {
-		fmt.Println(err.Error())
+		common.LogError(c, "查询数据异常 : "+err.Error())
+		response.Fail(c, "查询数据异常", nil)
+		return
 	}
 
 	// 格式化
@@ -190,6 +191,7 @@ func PermissionEdit(c *gin.Context) {
 	data["http_path"] = HttpPath
 
 	if err := DB.Model(&model.AdminPermissions{}).Where("id = ?", id).Updates(&data).Error; err != nil {
+		common.LogError(c, "更新失败 : "+err.Error())
 		response.Fail(c, "更新失败", nil)
 		return
 	}

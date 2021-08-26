@@ -16,59 +16,61 @@ func ApiInterfaceAuthCheck() gin.HandlerFunc {
 
 		//获取authorization header
 		tokenString := c.GetHeader("Authorization")
-
-		//validate token formate
-		if tokenString == "" || !strings.HasPrefix(tokenString, "Bearer ") {
-			response.Response(c, http.StatusUnauthorized, 401, nil, "Authorization None")
-			c.Abort()
-			return
-		}
-
-		tokenString = tokenString[7:]
-		token, claims, err := common.ParseToken(tokenString)
-		if err != nil || !token.Valid {
-			response.Response(c, http.StatusUnauthorized, 401, nil, "Authorization Error")
-			c.Abort()
-			return
-		}
-
-		//验证通过后获取 claims的userId
-		userId := claims.UserID
-		DB := common.GetDB()
-		var user model.AdminUsers
-		err = DB.First(&user, userId).Error
-		if err != nil {
-			response.Response(c, http.StatusUnauthorized, 401, nil, "账户 Fail")
-			c.Abort()
-			return
-		}
-		if user.ID == 0 {
-			response.Response(c, http.StatusUnauthorized, 401, nil, "账户不存在")
-			c.Abort()
-			return
-		}
-		contronller.FindUserDetailInfoById(DB, &user)
-
 		method := c.Request.Method
 		url := c.Request.URL.Path
-		if userId != 1 && !findUserPermission(method, url, user) {
-			//默认id为1的用户为超级用户，不需要权限检验
-			response.Response(c, http.StatusUnauthorized, 401, nil, "权限不足")
-			c.Abort()
-			return
-		}
-		//记录到数据库中
-		IP := c.ClientIP()
-		newAdminOperationLog := model.AdminOperationLog{
-			UserId:   int(userId),
-			UserName: user.Name,
-			Method:   method,
-			Path:     url,
-			Ip:       IP,
-		}
-		contronller.InsertLogs(DB, newAdminOperationLog)
+		if url != "/auth/admin/manager/login" {
+			//validate token formate
+			if tokenString == "" || !strings.HasPrefix(tokenString, "Bearer ") {
+				response.Response(c, http.StatusUnauthorized, 401, nil, "Authorization None")
+				c.Abort()
+				return
+			}
 
-		c.Set("user", user)
+			tokenString = tokenString[7:]
+			token, claims, err := common.ParseToken(tokenString)
+			if err != nil || !token.Valid {
+				response.Response(c, http.StatusUnauthorized, 401, nil, "Authorization Error")
+				c.Abort()
+				return
+			}
+
+			//验证通过后获取 claims的userId
+			userId := claims.UserID
+			DB := common.GetDB()
+			var user model.AdminUsers
+			err = DB.First(&user, userId).Error
+			if err != nil {
+				response.Response(c, http.StatusUnauthorized, 401, nil, "账户 Fail")
+				c.Abort()
+				return
+			}
+			if user.ID == 0 {
+				response.Response(c, http.StatusUnauthorized, 401, nil, "账户不存在")
+				c.Abort()
+				return
+			}
+			contronller.FindUserDetailInfoById(DB, &user)
+
+			if userId != 1 && !findUserPermission(method, url, user) {
+				//默认id为1的用户为超级用户，不需要权限检验
+				response.Response(c, http.StatusUnauthorized, 401, nil, "权限不足")
+				c.Abort()
+				return
+			}
+			//记录到数据库中
+			IP := c.ClientIP()
+			newAdminOperationLog := model.AdminOperationLog{
+				UserId:   int(userId),
+				UserName: user.Name,
+				Method:   method,
+				Path:     url,
+				Ip:       IP,
+			}
+			contronller.InsertLogs(DB, newAdminOperationLog)
+
+			c.Set("user", user)
+		}
+
 		c.Next()
 	}
 }
