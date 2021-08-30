@@ -3,10 +3,9 @@ package middleware
 import (
 	"github.com/gin-gonic/gin"
 	"go-gin-admin/common"
-	"go-gin-admin/contronller"
+	"go-gin-admin/contronller/auth"
 	"go-gin-admin/model"
 	"go-gin-admin/response"
-	"net/http"
 	"strings"
 )
 
@@ -18,10 +17,10 @@ func ApiInterfaceAuthCheck() gin.HandlerFunc {
 		tokenString := c.GetHeader("Authorization")
 		method := c.Request.Method
 		url := c.Request.URL.Path
-		if url != "/auth/admin/manager/login" {
+		if url != "/admin/manager/login" {
 			//validate token formate
 			if tokenString == "" || !strings.HasPrefix(tokenString, "Bearer ") {
-				response.Response(c, http.StatusUnauthorized, 401, nil, "Authorization None")
+				response.AuthFail(c, nil, "Authorization None")
 				c.Abort()
 				return
 			}
@@ -29,7 +28,7 @@ func ApiInterfaceAuthCheck() gin.HandlerFunc {
 			tokenString = tokenString[7:]
 			token, claims, err := common.ParseToken(tokenString)
 			if err != nil || !token.Valid {
-				response.Response(c, http.StatusUnauthorized, 401, nil, "Authorization Error")
+				response.AuthFail(c, nil, "Authorization Error")
 				c.Abort()
 				return
 			}
@@ -40,20 +39,20 @@ func ApiInterfaceAuthCheck() gin.HandlerFunc {
 			var user model.AdminUsers
 			err = DB.First(&user, userId).Error
 			if err != nil {
-				response.Response(c, http.StatusUnauthorized, 401, nil, "账户 Fail")
+				response.AuthFail(c, nil, "账户 Fail")
 				c.Abort()
 				return
 			}
 			if user.ID == 0 {
-				response.Response(c, http.StatusUnauthorized, 401, nil, "账户不存在")
+				response.AuthFail(c, nil, "账户不存在")
 				c.Abort()
 				return
 			}
-			contronller.FindUserDetailInfoById(DB, &user)
+			auth.FindUserDetailInfoById(DB, &user)
 
 			if userId != 1 && !findUserPermission(method, url, user) {
 				//默认id为1的用户为超级用户，不需要权限检验
-				response.Response(c, http.StatusUnauthorized, 401, nil, "权限不足")
+				response.AuthFail(c, nil, "权限不足")
 				c.Abort()
 				return
 			}
@@ -66,9 +65,10 @@ func ApiInterfaceAuthCheck() gin.HandlerFunc {
 				Path:     url,
 				Ip:       IP,
 			}
-			contronller.InsertLogs(DB, newAdminOperationLog)
+			auth.InsertLogs(DB, newAdminOperationLog)
 
 			c.Set("user", user)
+			c.Set("userId", userId)
 		}
 
 		c.Next()

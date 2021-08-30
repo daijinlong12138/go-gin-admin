@@ -1,4 +1,4 @@
-package contronller
+package auth
 
 import (
 	"fmt"
@@ -180,7 +180,7 @@ func ManagerDetail(c *gin.Context) {
 func ManagerDelete(c *gin.Context) {
 	DB := common.GetDB()
 	//获取参数
-	id := c.PostForm("id") //角色ID
+	id := c.PostForm("id") //用户ID
 	var user model.AdminUsers
 	Id, _ := strconv.Atoi(id)
 	DB.Where("id = ?", id).Find(&user)

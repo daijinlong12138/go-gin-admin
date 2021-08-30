@@ -1,4 +1,4 @@
-package contronller
+package auth
 
 import (
 	"github.com/gin-gonic/gin"
@@ -152,16 +152,43 @@ func MenuDelete(c *gin.Context) {
 
 func MenuInfo(c *gin.Context) {
 
-	menuList := make([]model.AdminMenu, 0)
+	get := c.DefaultPostForm("get", "0") //获取类型，0默认全部，1获取本身用户
 	db := common.GetDB()
-	//展示菜单的树形结构
-	//1.获取全部菜单数据，order 默认0，越大排序越前
-	err := db.Find(&menuList).Error
-	if err != nil {
-		response.Fail(c, "查询失败", nil)
-		common.LogError(c, "查询失败: "+err.Error())
+	menuList := make([]model.AdminMenu, 0)
+	//获取当前用户的菜单目录
+	if get == "0" {
+		//展示菜单的树形结构
+		//1.获取全部菜单数据，order 默认0，越大排序越前
+		err := db.Find(&menuList).Error
+		if err != nil {
+			response.Fail(c, "查询失败", nil)
+			common.LogError(c, "查询失败: "+err.Error())
+			return
+		}
+	} else if get == "1" {
+		userId, exists := c.Get("userId")
+		if !exists {
+			response.Fail(c, "用户数据不存在", nil)
+			common.LogError(c, "用户数据不存在")
+			return
+		}
+		//查询对应用户角色下的全部菜单
+		err := db.Raw("SELECT admin_menus.id as id,admin_menus.parent_id as parent_id,admin_menus.type as type,admin_menus.`order` as `order`,admin_menus.title as title,admin_menus.icon as icon,admin_menus.url as url,admin_menus.header as header,admin_menus.created_at as created_at,admin_menus.updated_at as updated_at FROM admin_role_users "+
+			" JOIN admin_role_menus ON admin_role_users.role_id = admin_role_menus.role_id "+
+			" JOIN admin_menus ON admin_menus.id = admin_role_menus.menu_id "+
+			" WHERE admin_role_users.user_id=? "+
+			" GROUP BY admin_menus.id", userId).Scan(&menuList).Error
+		if err != nil {
+			response.Fail(c, "查询失败", nil)
+			common.LogError(c, "查询失败: "+err.Error())
+			return
+		}
+	} else {
+		response.Fail(c, "错误类型", nil)
+		common.LogError(c, "错误类型 ")
 		return
 	}
+
 	//2.数据处理
 	// 查找相同上级目录--组成数组，并排序
 	tree := MenuList(menuList, 0)
